@@ -2,28 +2,29 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 require('../models/Categoria');
+require('../models/Post');
 const Categoria = mongoose.model("categorias");
+const Post = mongoose.model("posts");
 
 router.get('/', (req, res) => {
     res.render("admin/index")
 })
 
-router.get('/posts', (req, res) => {
-    res.send("Página de posts")
-})
 
 router.get('/categorias', (req, res) => {
     Categoria.find().sort({date: 'desc'}).then((categorias) => {
         res.render('admin/categorias', {categorias: categorias.map(categoria => categoria.toJSON())});
     }).catch((err) => {
-        req.flash("error_msg", "Houve um erro ao listar as categorias: " + err);
+        req.flash("error_msg", "Houve um erro ao listar as categorias");
         res.redirect("/admin");
     })
 })
 
+
 router.get('/categorias/add', (req, res) => {
     res.render('admin/addcategorias');
 })
+
 
 router.post('/categorias/nova', (req ,res) => {
     var erros = [];
@@ -46,23 +47,25 @@ router.post('/categorias/nova', (req ,res) => {
         const novaCategoria = { nome, slug } = req.body;
 
         new Categoria(novaCategoria).save().then(() => {
-            req.flash("success_msg", "Categoria criada com sucesso!")
+            req.flash("success_msg", "Categoria criada com sucesso")
             res.redirect('/admin/categorias');
         }).catch((err) => {
-            req.flash("error_msg", "Erro ao salvar categoria, tente novamente!")
+            req.flash("error_msg", "Houve um erro ao salvar categoria, tente novamente")
             res.redirect("/admin");
         })
     }
 })
 
+
 router.get('/categorias/edit/:id', (req, res) => {
     Categoria.findOne({_id: req.params.id}).then((categoria) => {
         res.render("admin/editcategorias", {categoria: categoria.toJSON()});
     }).catch((err) => {
-        req.flash("error_msg", "Esta categoria não existe!");
+        req.flash("error_msg", "Esta categoria não existe");
         res.redirect("/admin/categorias");
     })
 })
+
 
 router.post('/categorias/edit', (req, res) => {
     var erros = [];
@@ -105,6 +108,7 @@ router.post('/categorias/edit', (req, res) => {
     }
 })
 
+
 router.post('/categorias/remove', (req, res) => {
     Categoria.deleteOne({_id: req.body.id}).then(() => {
         req.flash("success_msg", "Categoria removida com sucesso");
@@ -114,5 +118,40 @@ router.post('/categorias/remove', (req, res) => {
         res.redirect('/admin/categorias');
     })
 })
+
+
+router.get('/posts', (req, res) => {
+    Post.find().populate('categoria').sort('desc').then((posts) => {
+        res.render("admin/posts", {posts: posts.map(post => post.toJSON())});
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao listar postagens");
+        res.redirect("/admin");
+    })
+    
+})
+
+
+router.get('/posts/add', (req, res) => {
+    Categoria.find().then((categorias) => {
+        res.render('admin/addpost', {categorias: categorias.map(categoria => categoria.toJSON())});
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao carregar o formulário");
+        res.redirect('/admin')        
+    })
+})
+
+
+router.post('/posts/novo', (req, res) => {
+    const post = { titulo, slug, descricao, conteudo, categoria } = req.body;
+
+    new Post(post).save().then(() => {
+        req.flash("success_msg", "Post criado com sucesso");
+        res.redirect('/admin/posts');
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao criar postagem, tente novamente");
+        res.redirect('/admin');
+    })
+})
+
 
 module.exports = router;
