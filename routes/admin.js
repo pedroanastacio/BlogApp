@@ -127,7 +127,6 @@ router.get('/posts', (req, res) => {
         req.flash("error_msg", "Houve um erro ao listar postagens");
         res.redirect("/admin");
     })
-    
 })
 
 
@@ -150,6 +149,44 @@ router.post('/posts/novo', (req, res) => {
     }).catch((err) => {
         req.flash("error_msg", "Houve um erro ao criar postagem, tente novamente");
         res.redirect('/admin');
+    })
+})
+
+
+router.get('/posts/edit/:id', (req, res) => {
+    const { id }= req.params;
+    Post.findById(id).populate('categoria').then((post) => {
+        Categoria.find().then((categorias) => {
+            res.render('admin/editpost', {post: post.toJSON(), categorias: categorias.map(categoria => categoria.toJSON())})
+        }).catch((err) => {
+            req.flash('error_msg', "Erro ao carregar formulário")
+            res.redirect('/admin/posts')
+        })        
+    }).catch((err) => {
+        req.flash('error_msg', "Esta postagem não existe");
+        res.redirect('/admin/posts');
+    })
+})
+
+
+router.post('/posts/edit', (req, res) => {
+     Post.findById(req.body.id).then((post) => {
+        post.titulo = req.body.titulo;
+        post.slug = req.body.slug;
+        post.descricao = req.body.descricao;
+        post.conteudo = req.body.conteudo;
+        post.categoria = req.body.categoria;
+
+        post.save().then(() => {
+            req.flash('success_msg', 'Post editado com sucesso');
+            res.redirect('/admin/posts');
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro ao salvar o post');
+            res.redirect('/admin/posts');
+        })
+    }).catch((err) => {
+        req.flash('error_msg', 'Houve um erro ao editar o post');
+        res.redirect('/admin/posts');
     })
 })
 
