@@ -121,7 +121,7 @@ router.post('/categorias/remove', (req, res) => {
 
 
 router.get('/posts', (req, res) => {
-    Post.find().populate('categoria').sort('desc').then((posts) => {
+    Post.find().populate('categoria').then((posts) => {
         res.render("admin/posts", {posts: posts.map(post => post.toJSON())});
     }).catch((err) => {
         req.flash("error_msg", "Houve um erro ao listar postagens");
@@ -186,6 +186,17 @@ router.post('/posts/edit', (req, res) => {
         })
     }).catch((err) => {
         req.flash('error_msg', 'Houve um erro ao editar o post');
+        res.redirect('/admin/posts');
+    })
+})
+
+
+router.post('/posts/remove', (req, res) => {
+    Post.findByIdAndDelete(req.body.id).then(() => {
+        req.flash("success_msg","Post removido com sucesso");
+        res.redirect("/admin/posts");
+    }).catch((err) => {
+        req.flash("error_msg", "Houve um erro ao remove o post");
         res.redirect('/admin/posts');
     })
 })

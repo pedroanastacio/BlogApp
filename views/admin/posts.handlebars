@@ -12,7 +12,7 @@
                 <small>{{categoria.nome}}</small><br>
                 <small>{{data}}</small>
             </div>
-            <div class="col" style="margin: auto; text-align: center">
+            <div class="col" style="margin: auto; text-align: center;">
                 <a href="/admin/posts/edit/{{_id}}"><button class="btn btn-info">Editar</button></a>
                 <form action="/admin/posts/remove" method="post">
                     <input type="hidden" name="id" value="{{_id}}">
