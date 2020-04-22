@@ -7,6 +7,8 @@ const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('connect-flash');
+require('./models/Post');
+const Post = mongoose.model("posts");
 
 //CONFIGS
     //SESSION
@@ -41,6 +43,20 @@ const flash = require('connect-flash');
         
 //ROTAS
     app.use('/admin', admin);
+
+    app.get('/', (req, res) => {
+        Post.find().populate('categoria').sort({data: 'desc'}).then((posts) => {
+            res.render("index", {posts: posts.map(post => post.toJSON())});
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro interno");
+            res.redirect("/404");
+        })
+        
+    })
+
+    app.get('/404', (req, res) => {
+        res.send("Erro 404!");
+    })
 
 //OUTROS
     const PORT = 8081;
