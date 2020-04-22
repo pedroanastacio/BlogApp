@@ -54,8 +54,25 @@ const Post = mongoose.model("posts");
         
     })
 
+
     app.get('/404', (req, res) => {
         res.send("Erro 404!");
+    })
+
+
+    app.get('/post/:slug', (req, res) => {
+        Post.findOne({slug: req.params.slug}).then((post) => {
+            if(post){
+                console.log(post);
+                res.render("post/index", {post: post.toJSON()});
+            }else{
+                req.flash("error_msg", "Esta postagem não existe");
+                res.redirect("/");
+            }
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro ao carregar postagem");
+            res.redirect("/");
+        })
     })
 
 //OUTROS

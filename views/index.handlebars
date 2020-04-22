@@ -13,10 +13,13 @@
 <h2>Postagens recentes</h2>
 
 {{#each posts}}
-<div class="card mt-2">
+<div class="card mt-4">
     <div class="card-body">
         <h3>{{titulo}}</h3>
         <p>{{descricao}}</p>
+        <a href="/post/{{slug}}"><button class="btn btn-info">Leia mais</button></a>
+        <hr>
+        <small>{{categoria.nome}}</small><br>
         <small>{{data}}</small>
     </div>
 </div>
