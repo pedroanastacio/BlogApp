@@ -8,7 +8,9 @@ const mongoose = require('mongoose');
 const session = require('express-session');
 const flash = require('connect-flash');
 require('./models/Post');
+require('./models/Categoria');
 const Post = mongoose.model("posts");
+const Categoria = mongoose.model('categorias');
 
 //CONFIGS
     //SESSION
@@ -63,7 +65,6 @@ const Post = mongoose.model("posts");
     app.get('/post/:slug', (req, res) => {
         Post.findOne({slug: req.params.slug}).then((post) => {
             if(post){
-                console.log(post);
                 res.render("post/index", {post: post.toJSON()});
             }else{
                 req.flash("error_msg", "Esta postagem não existe");
@@ -74,6 +75,37 @@ const Post = mongoose.model("posts");
             res.redirect("/");
         })
     })
+
+
+    app.get('/categorias', (req, res) => {
+        Categoria.find().then((categorias) => {
+            res.render("categorias/index", {categorias: categorias.map(categoria => categoria.toJSON())});
+        }).catch((err) => {
+            req.flash("error_msg", "Houve um erro interno");
+            res.redirect('/');
+        })
+    })
+
+
+    app.get('/categorias/:slug', (req, res) => {
+        Categoria.findOne({slug: req.params.slug}).then((categoria) => {
+            if(categoria){
+                Post.find({categoria: categoria._id}).then((posts) => {
+                    res.render("categorias/posts", {posts: posts.map(post => post.toJSON()), categoria: categoria.toJSON()});
+                }).catch((err) => {
+                    req.flash('error_msg', 'Houve um erro ao listar postagens')
+                    res.redirect('/categorias');
+                })
+            }else{
+                req.flash('error_msg', 'Esta categoria não existe');
+                res.redirect('/');
+            }
+        }).catch((err) => {
+            req.flash('error_msg', 'Houve um erro interno ao carregar a página desta categoria');
+            res.redirect('/categorias');
+        })
+    })
+
 
 //OUTROS
     const PORT = 8081;
