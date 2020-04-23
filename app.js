@@ -3,6 +3,7 @@ const handlebars = require('express-handlebars');
 const bodyParser = require('body-parser');
 const app = express();
 const admin = require('./routes/admin');
+const users = require('./routes/user');
 const path = require('path');
 const mongoose = require('mongoose');
 const session = require('express-session');
@@ -45,6 +46,7 @@ const Categoria = mongoose.model('categorias');
         
 //ROTAS
     app.use('/admin', admin);
+    app.use('/users', users);
 
     app.get('/', (req, res) => {
         Post.find().populate('categoria').sort({data: 'desc'}).then((posts) => {
