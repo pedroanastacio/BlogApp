@@ -12,6 +12,8 @@ require('./models/Post');
 require('./models/Categoria');
 const Post = mongoose.model("posts");
 const Categoria = mongoose.model('categorias');
+const passport = require('passport');
+require('./config/auth')(passport);
 
 //CONFIGS
     //SESSION
@@ -20,19 +22,28 @@ const Categoria = mongoose.model('categorias');
             resave: true,
             saveUninitialized: true
         }))
+
+        app.use(passport.initialize());
+        app.use(passport.session());
+
         app.use(flash());
+
     //MIDDLEWARE
         app.use((req, res, next) => {
             res.locals.success_msg = req.flash("success_msg");
             res.locals.error_msg = req.flash('error_msg');
+            res.locals.error = req.flash('error');
             next();
         })
+
     //BODY PARSER
         app.use(bodyParser.urlencoded({extended: true}))
         app.use(bodyParser.json());
+
     //HANDLEBARS
         app.engine('handlebars', handlebars({defaultLayout: 'main'}));
         app.set('view engine', 'handlebars'); 
+    
     //MONGOOSE
         mongoose.Promise = global.Promise;
         mongoose.connect("mongodb://localhost/blogapp").then(() => {
